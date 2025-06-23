@@ -3,26 +3,46 @@ import { iPgManager } from "../instances/iPgManager.js";
 import CryptManager from "../services/bcrypt.js";
 
 class User {
-    static async createUser({username, pwd, email}){
+    static async createUser({name, last_name, email, id_cardNumber, phone_number}){
         try {
             // Simulacion de insertar usuario en la bd
-            if(await this.validateUsername({username})){
-                throw new Error('El nombre de usuario ya existe');
-            }
+            // if(await this.validateUsername({username})){
+            //     throw new Error('El nombre de usuario ya existe');
+            // }
 
-            if(await this.validateEmail({email})){
+            const [isValidEmail, isValidPhoneNumber] = await Promise.all([
+                this.validateEmail({email}),
+                this.validatePhoneNumber({phone_number})])
+
+            if(isValidEmail){
                 throw new Error('El email ya está registrado');
             }
-            const hashedPWd = await CryptManager.encriptarData({data: pwd, saltRounds: 10});
-            console.log('Contrasena encriptada:', hashedPWd);
-            const key = 'registerUser';
-            const params = [username, email, hashedPWd];
+
+            if(isValidPhoneNumber.success){
+                throw new Error('El número de teléfono ya está registrado');
+            }
+    
+            const key = 'createUser';
+            const params = [name, last_name, email, id_cardNumber, phone_number];
             const result = await iPgManager.exeQuery({key, params});
-            console.log(result)
-            return result;
+
+            return {success: true, message: 'Usuario registrado exitosamente', result};
 
         } catch (error) {
-            throw new Error(`Error al registrar el usuario: ${error.message}`);
+            throw new Error(`Error al crear el usuario: ${error.message}`);
+        }
+    }
+
+    static async registerUserPOST({id_cardNumber, email, password}){
+        try {
+            const key = 'registerUser';
+            // Encriptar la contraseña
+            const hashedPassword = await CryptManager.encriptarData({data: password, saltRounds: 10})
+            const params = [id_cardNumber, email, hashedPassword];
+            const registerResult = await iPgManager.exeQuery({key, params})
+            return registerResult
+        } catch (error) {
+            throw new Error(`Error al registrar el usuario: ${error.message}`)
         }
     }
 
@@ -32,9 +52,9 @@ class User {
             const params = [username];
             const result = await iPgManager.exeQuery({key, params});
             if (result.length > 0) {
-                return true; // El nombre de usuario ya existe
+                return {success: true, result}; // El nombre de usuario ya existe
             }
-            return false; // El nombre de usuario no existe
+            return {success: false}; // El nombre de usuario no existe
         } catch (error) {
             throw new Error(`Error al validar el nombre de usuario: ${error.message}`);
         }
@@ -46,7 +66,7 @@ class User {
             const params = [email];
             const result = await iPgManager.exeQuery({key, params});
             if (result.length > 0) {
-                return true; // El email ya existe
+                return {success: true, result: result[0]}; // El email ya existe
             }
             return false; // El email no existe
         } catch (error) {
@@ -54,17 +74,43 @@ class User {
         }
     }
 
-    static async validatePassword({usuario, password}){
+    static async validatePassword({email, password}){
         try {
             const key = 'validatePassword';
-            const params = [usuario]
+            const params = [email]
             const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
-            console.log(pwd_usuario)
+            
             const isValdPwd = await CryptManager.compareData({hashedData: pwd_usuario, toCompare: password})
-            console.log(isValdPwd)
-            return isValdPwd;
+            
+            return {success: isValdPwd};
         } catch (error) {
             throw new Error(`Error al verificar la contraseña: ${error.message}`);
+        }
+    }
+
+    static async validatePhoneNumber({phone_number}){
+        try {
+            const key = 'validatePhoneNumber';
+            const params = [phone_number];
+            const result = await iPgManager.exeQuery({key, params});
+            if (result.length > 0) {
+                return {success: true, result}; // El número de teléfono ya existe
+            }
+            return {success: false}; // El número de teléfono no existe
+        } catch (error) {
+            throw new Error(`Error al validar el número de teléfono: ${error.message}`);
+        }
+    }
+
+    static async changePassword({newPassword}){
+        try {
+            const key = 'changePassword';
+            const hashedNewPassword = await CryptManager.encriptarData({data: newPassword, saltRounds: 10});
+            const params = [hashedNewPassword];
+            const result = await iPgManager.exeQuery({key, params});
+            return {success: true, message: 'Contraseña cambiada exitosamente', result};
+        } catch (error) {
+            throw new Error(`Error al cambiar la contraseña: ${error.message}`);
         }
     }
 }
