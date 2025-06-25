@@ -63,19 +63,13 @@ class User {
 
             // Preparar y ejecutar la consulta
             const key1 = 'registerUser';
-            const params1 = [id_cardNumber, email, hashedPassword];
-            const [{id_usuario}] = await iPgManager.exeQuery({key: key1, params: params1, client})
-            const key2 = 'updateRegisterStatus';
-            const params2 = [id_usuario, true]
-            await iPgManager.exeQuery({
-                key: key2,
-                params: params2,
-                client
-            })
-            await iPgManager.commitTransaction();
+            const params1 = [hashedPassword, email, true, id_cardNumber];
+            await iPgManager.exeQuery({key: key1, params: params1, client})
+            //console.log('ID del usuario registrado:', id_usuario);
+            await iPgManager.commitTransaction(client);
             return {success: true}
         } catch (error) {
-            await iPgManager.rollbackTransaction()
+            await iPgManager.rollbackTransaction(client)
             console.error('Error en registrar usuario model:', error)
             throw new Error(`Error al registrar el usuario.`)
         }

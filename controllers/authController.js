@@ -50,14 +50,14 @@ class AuthController{
             const {password, email} = req.body
             const {register_token} = req.cookies
             console.log(req.cookies)
-            console.log('Datos de registro: ', id_cardNumber, password)
+            
 
             const {id_cardNumber} = jwtComponent.verifyToken({
                 token: register_token,
                 key: process.env.REGISTER_TOKEN_SECRET
             })
-
-            console.log('Decoded register token: ', decoded)
+            console.log('Datos de registro: ', id_cardNumber, password)
+            console.log('Decoded register token: ', id_cardNumber)
 
             await User.registerUserPOST({
                 id_cardNumber,
