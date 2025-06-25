@@ -1,7 +1,5 @@
-
-
 import User from "../models/userModels.js"
-import sessionManager  from "../services/sessionManager.js"
+import jwtComponent from "../services/jwtComponent.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -20,7 +18,7 @@ class AuthController{
                     error: 'Este correo no esta vinculado a ningun usuario'
                 })
             }
-            //Validar contraseña
+            // Validar contraseña
             const isValidPassword = await User.validatePassword({email, password})
             if(!isValidPassword){
                 return res.status(401).json({
@@ -30,9 +28,9 @@ class AuthController{
 
             // Crear sesion con jsonwebtoken
             console.log('payload: ', isValidEmail.result)
-            const {access_token} = sessionManager.createSession({payload: isValidEmail.result, access_token_key: process.env.ACCES_TOKEN_SECRET})
+            const {token} = jwtComponent.generateToken({payload: isValidEmail.result, token_key: process.env.ACCES_TOKEN_SECRET, options:{expiresIn: '2h'}})
 
-            res.cookie('access_token', access_token, {httpOnly: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 2})
+            res.cookie('access_token', token, {httpOnly: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 2})
 
             return res.status(200).json({
                 message: `Login exitoso`
@@ -49,15 +47,23 @@ class AuthController{
     static async registerPOST(req, res){
         try {
             //console.log(req)
-            const {id_cardNumber, password, email} = req.body
+            const {password, email} = req.body
+            const {register_token} = req.cookies
+            console.log(req.cookies)
             console.log('Datos de registro: ', id_cardNumber, password)
 
-            const registerResult = await User.registerUserPOST({
+            const {id_cardNumber} = jwtComponent.verifyToken({
+                token: register_token,
+                key: process.env.REGISTER_TOKEN_SECRET
+            })
+
+            console.log('Decoded register token: ', decoded)
+
+            await User.registerUserPOST({
                 id_cardNumber,
                 email,
                 password
             })
-
 
             return res.status(200).json({
                 mensaje: `Registro de poseedor de cedula ${id_cardNumber} exitoso`
@@ -71,10 +77,52 @@ class AuthController{
         }
     }
 
+
+    static async verifyIdCardNumberPOST(req, res){
+        try {
+            const {id_cardNumber} = req.body
+            console.log('Datos de verificación de cedula: ', id_cardNumber)
+            // Validar cedula
+            const isValidIdCardNumber = await User.validateIdCardNumber({id_cardNumber})
+            console.log('isValidIdCardNumber: ', isValidIdCardNumber)
+            if(!isValidIdCardNumber.exists){
+                return res.status(404).json({
+                    error: 'Cedula no registrada en el sistema.'
+                })
+            }
+
+            const registerToken = jwtComponent.generateToken({
+                payload: {id_cardNumber},
+                token_key: process.env.REGISTER_TOKEN_SECRET,
+                options: {expiresIn: '5m'}
+            })
+
+            res.cookie('register_token', registerToken, {
+                httpOnly: true,
+                sameSite: 'none',
+                maxAge: 1000 * 60 * 5
+            })
+
+
+            return res.status(200).json({
+                success: true,
+                message: 'Cedula verificada exitosamente.'
+            })
+
+        } catch (error) {
+            console.log('Error en verifyIdCardNumberPOST: ', error)
+            return res.status(500).json({
+                error: 'Error al intentar verificar la cedula',
+                detalle: error.message
+            })
+        }
+    }
+
     static async createUserPOST(req, res){
         try {
             const {id_cardNumber, first_name, last_name, email, phone_number} = req.body;
-            console.log(req.body)
+            // console.log(req.body)
+
             const createUserResult = await User.createUser({
                 name: first_name,
                 last_name,
@@ -83,7 +131,19 @@ class AuthController{
                 phone_number
             })
 
-            return {success: true, message: `Usuario ${first_name} ${last_name} con C.I ${id_cardNumber}`, result: createUserResult}
+            console.log(createUserResult)
+
+            if(!createUserResult.success){
+                return res.status(createUserResult.status).json({
+                    message: createUserResult.message,
+                })
+            }
+
+            return res.status(createUserResult.status).json({
+                ...createUserResult
+            })
+
+            
         } catch (error) {
             console.log('Error en createUserPOST: ', error);
             return res.status(500).json({
@@ -105,7 +165,7 @@ class AuthController{
                 message: 'Logout exitoso'
             })
         } catch (error) {
-            console.log('Error en logoutPOST: ', error)
+            console.error('Error en logoutPOST: ', error)
             return res.status(500).json({
                 error: 'Error al intentar hacer logout',
                 detalle: error.messagge

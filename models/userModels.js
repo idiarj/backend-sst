@@ -1,6 +1,7 @@
 
 import { iPgManager } from "../instances/iPgManager.js";
 import CryptManager from "../services/bcrypt.js";
+import jwtComponent from "../services/jwtComponent.js";
 
 class User {
     static async createUser({name, last_name, email, id_cardNumber, phone_number}){
@@ -15,34 +16,83 @@ class User {
                 this.validatePhoneNumber({phone_number})])
 
             if(isValidEmail){
-                throw new Error('El email ya está registrado');
+                return {
+                    success: false,
+                    message: 'El email ya está asociado a un usuario.',
+                    status: 409
+                }
             }
 
             if(isValidPhoneNumber.success){
-                throw new Error('El número de teléfono ya está registrado');
+                return {
+                    success: false,
+                    message: 'El número de teléfono ya está asociado a un usuario.',
+                    status: 409
+                }
             }
+
+            let registerFlag = false;
     
             const key = 'createUser';
-            const params = [name, last_name, email, id_cardNumber, phone_number];
+            const params = [name, last_name, email, id_cardNumber, phone_number, 1, registerFlag];
             const result = await iPgManager.exeQuery({key, params});
 
-            return {success: true, message: 'Usuario registrado exitosamente', result};
+            return {
+                success: true,
+                message: `Usuario ${name} ${last_name} con C.I: ${id_cardNumber} creado con exito.`,
+                status: 201
+            }
 
         } catch (error) {
-            throw new Error(`Error al crear el usuario: ${error.message}`);
+            console.error('Error en createUser Model:', error)
+            throw new Error(`Error al crear el usuario.`);
         }
     }
 
     static async registerUserPOST({id_cardNumber, email, password}){
+        const client = await iPgManager.beginTransaction();
         try {
-            const key = 'registerUser';
+
+
             // Encriptar la contraseña
             const hashedPassword = await CryptManager.encriptarData({data: password, saltRounds: 10})
-            const params = [id_cardNumber, email, hashedPassword];
-            const registerResult = await iPgManager.exeQuery({key, params})
-            return registerResult
+            const isValdEmail = await this.validateEmail({email});
+            if(isValdEmail.success){
+                email = null; // Si el email ya existe, lo dejamos como null
+            }
+
+            // Preparar y ejecutar la consulta
+            const key1 = 'registerUser';
+            const params1 = [id_cardNumber, email, hashedPassword];
+            const [{id_usuario}] = await iPgManager.exeQuery({key: key1, params: params1, client})
+            const key2 = 'updateRegisterStatus';
+            const params2 = [id_usuario, true]
+            await iPgManager.exeQuery({
+                key: key2,
+                params: params2,
+                client
+            })
+            await iPgManager.commitTransaction();
+            return {success: true}
         } catch (error) {
-            throw new Error(`Error al registrar el usuario: ${error.message}`)
+            await iPgManager.rollbackTransaction()
+            console.error('Error en registrar usuario model:', error)
+            throw new Error(`Error al registrar el usuario.`)
+        }
+    }
+
+    static async validateIdCardNumber({id_cardNumber}){
+        try {
+            const key = 'validateIdCardNumber';
+            const params = [id_cardNumber];
+            const result = await iPgManager.exeQuery({key, params});
+            if (result.length > 0) {
+                return {exists: true, result}; // La cédula ya existe
+            }
+            return {exists: false}; // La cédula no existe
+        } catch (error) {
+            console.error('Error en validateIdCardNumber model:', error)
+            throw new Error('Error al validar la cedula del usuario.')
         }
     }
 
@@ -56,6 +106,7 @@ class User {
             }
             return {success: false}; // El nombre de usuario no existe
         } catch (error) {
+            console.error('Error en validateUser model:', error)
             throw new Error(`Error al validar el nombre de usuario: ${error.message}`);
         }
     }
@@ -70,6 +121,7 @@ class User {
             }
             return false; // El email no existe
         } catch (error) {
+            console.error('Error en validateEmail model:', error)
             throw new Error(`Error al validar el email: ${error.message}`);
         }
     }
@@ -79,11 +131,12 @@ class User {
             const key = 'validatePassword';
             const params = [email]
             const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
-            
+            console.log('Contraseña del usuario:', pwd_usuario);
             const isValdPwd = await CryptManager.compareData({hashedData: pwd_usuario, toCompare: password})
             
             return {success: isValdPwd};
         } catch (error) {
+            console.error('Error en validateEmail model:', error)
             throw new Error(`Error al verificar la contraseña: ${error.message}`);
         }
     }
@@ -98,6 +151,7 @@ class User {
             }
             return {success: false}; // El número de teléfono no existe
         } catch (error) {
+            console.error('Error en validatePhoneNumber model:', error)
             throw new Error(`Error al validar el número de teléfono: ${error.message}`);
         }
     }
@@ -110,6 +164,7 @@ class User {
             const result = await iPgManager.exeQuery({key, params});
             return {success: true, message: 'Contraseña cambiada exitosamente', result};
         } catch (error) {
+            console.error('Error en changePassword model:', error)
             throw new Error(`Error al cambiar la contraseña: ${error.message}`);
         }
     }

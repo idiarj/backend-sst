@@ -1,18 +1,15 @@
 import jwt from 'jsonwebtoken';
 
 
-class sessionManager{
-    constructor(){
+class jwtComponent{
 
-    }
-    
-    static createSession({payload, access_token_key, refresh_token_key}){
+    static generateToken({payload, token_key, options}){
         try {
-            const access_token = jwt.sign(payload, access_token_key, {expiresIn: '5min'})
+            const token = jwt.sign(payload, token_key, options)
             //const refresh_token = jwt.sign(payload, refresh_token_key, {expiresIn:  '3h'})
-            console.log(`Access token: ${access_token}`);
+            console.log(`Token created: ${token}`);
             // console.log(`Refresh token: ${refresh_token}`);
-            return {access_token}
+            return token;
         } catch (error) {
             console.log(`Error: ${error}`);
             throw error;
@@ -40,4 +37,4 @@ class sessionManager{
     }   
 }
 
-export default sessionManager
+export default jwtComponent;

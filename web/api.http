@@ -1,2 +1,2 @@
-# Register
+## Register
 GET http://localhost:3000/auth/register
