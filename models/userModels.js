@@ -90,20 +90,20 @@ class User {
         }
     }
 
-    static async validateUsername({username}){
-        try {
-            const key = 'selectUserByUsername';
-            const params = [username];
-            const result = await iPgManager.exeQuery({key, params});
-            if (result.length > 0) {
-                return {success: true, result}; // El nombre de usuario ya existe
-            }
-            return {success: false}; // El nombre de usuario no existe
-        } catch (error) {
-            console.error('Error en validateUser model:', error)
-            throw new Error(`Error al validar el nombre de usuario: ${error.message}`);
-        }
-    }
+    // static async validateUsername({username}){
+    //     try {
+    //         const key = 'selectUserByUsername';
+    //         const params = [username];
+    //         const result = await iPgManager.exeQuery({key, params});
+    //         if (result.length > 0) {
+    //             return {success: true, result}; // El nombre de usuario ya existe
+    //         }
+    //         return {success: false}; // El nombre de usuario no existe
+    //     } catch (error) {
+    //         console.error('Error en validateUser model:', error)
+    //         throw new Error(`Error al validar el nombre de usuario: ${error.message}`);
+    //     }
+    // }
 
     static async validateEmail({email}){
         try {
@@ -120,10 +120,10 @@ class User {
         }
     }
 
-    static async validatePassword({email, password}){
+    static async validatePassword({id_cardNumber, password}){
         try {
             const key = 'validatePassword';
-            const params = [email]
+            const params = [id_cardNumber]
             const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
             console.log('Contraseña del usuario:', pwd_usuario);
             const isValdPwd = await CryptManager.compareData({hashedData: pwd_usuario, toCompare: password})

@@ -4,7 +4,7 @@
     "selectUserByUsername": "SELECT * FROM usuario WHERE LOWER(nom_usuario) = LOWER($1)",
     "selectUserByEmail": "SELECT email_usuario, nom_usuario, ape_usuario, ced_usuario FROM usuario WHERE email_usuario = $1",
     "validatePhoneNumber": "SELECT tlf_usuario FROM usuario WHERE tlf_usuario = $1",
-    "validatePassword": "SELECT pwd_usuario FROM usuario WHERE email_usuario = $1",
+    "validatePassword": "SELECT pwd_usuario FROM usuario WHERE ced_usuario = $1",
     "validateIdCardNumber": "SELECT ced_usuario FROM usuario WHERE ced_usuario = $1",
     "updateUserPassword": "UPDATE usuario SET pwd_usuario = $1 WHERE email_usuario = $2"
 }

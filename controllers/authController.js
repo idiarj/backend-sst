@@ -6,31 +6,48 @@ dotenv.config();
 class AuthController{
     static async loginPOST(req, res){
         try {
-            const {email, password} = req.body
-            console.log('Datos de login: ', email, password)
+            const {id_cardNumber, password} = req.body
+            console.log('Datos de login: ', id_cardNumber, password)
 
-
-            //Validar nombre de usuario
-            const isValidEmail = await User.validateEmail({email})
-            console.log('isValidEmail: ', isValidEmail)
-            if(!isValidEmail.success){
-                return res.status(404).json({
-                    error: 'Este correo no esta vinculado a ningun usuario'
+            console.log('sesion: ',req.cookies)
+            if(req.cookies.access_token){
+                res.clearCookie('access_token')
+                return res.status(403).json({
+                    error: 'Ya hay una sesion activa.'
                 })
             }
+
+            //Validar nombre de usuario
+            const isValidIdCardNumber = await User.validateIdCardNumber({
+                id_cardNumber
+            })
+
+            
+            console.log('isValidIdCardNumber: ', isValidIdCardNumber)
+            if(!isValidIdCardNumber.exists){
+                return res.status(404).json({
+                    error: 'Este número de cédula no está vinculado a ningún usuario'
+                })
+            }
+
             // Validar contraseña
-            const isValidPassword = await User.validatePassword({email, password})
-            if(!isValidPassword){
+            const isValidPassword = await User.validatePassword({id_cardNumber, password})
+            console.log('isValidPwd', isValidPassword)
+            if(!isValidPassword.success){
                 return res.status(401).json({
                     error: 'Contraseña incorrecta'
                 })
             }
 
             // Crear sesion con jsonwebtoken
-            console.log('payload: ', isValidEmail.result)
-            const {token} = jwtComponent.generateToken({payload: isValidEmail.result, token_key: process.env.ACCES_TOKEN_SECRET, options:{expiresIn: '2h'}})
+            const userData = isValidIdCardNumber.result[0]; // Extraer el usuario de la base de datos
+            const token = jwtComponent.generateToken({
+                payload: { id_cardNumber: userData.id_cardNumber }, // Puedes agregar más campos si lo necesitas
+                token_key: process.env.ACCESS_TOKEN_SECRET,
+                options: { expiresIn: '2h' }
+            });
 
-            res.cookie('access_token', token, {httpOnly: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 2})
+            res.cookie('access_token', token, { httpOnly: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 2 }); // 2 horas
 
             return res.status(200).json({
                 message: `Login exitoso`
@@ -157,9 +174,14 @@ class AuthController{
         try {
             console.log(req.cookies)
             const {access_token} = req.cookies
+            if(!access_token){
+                res.status(200).json({
+                    error: 'No hay una sesion activa.'
+                })
+            }
             console.log('Datos de logout: ', access_token)
 
-            res.clearCookie(access_token);
+            res.clearCookie('access_token');
             console.log(req.cookies)
             return res.status(200).json({
                 message: 'Logout exitoso'
