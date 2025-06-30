@@ -116,13 +116,14 @@ class User {
         try {
             const key = 'validatePassword';
             const params = [id_cardNumber]
-            const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
             console.log('Contraseña del usuario:', pwd_usuario);
+            const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
+            
             const isValdPwd = await CryptManager.compareData({hashedData: pwd_usuario, toCompare: password})
             
             return {success: isValdPwd};
         } catch (error) {
-            console.error('Error en validateEmail model:', error)
+            console.error('Error en validatePassword model:', error)
             throw new Error(`Error al verificar la contraseña: ${error.message}`);
         }
     }

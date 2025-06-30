@@ -11,7 +11,6 @@ export class PgHandler{
      * @param {Object} config - Configuracion para el pool de conexiones de la clase.
      * @param {Object} querys - Objeto que contiene las consultas SQL predefinidas/
      */
-
     constructor({ config, querys }) {
         this.config = config
         this.querys = querys

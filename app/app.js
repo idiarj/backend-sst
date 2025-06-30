@@ -16,24 +16,6 @@ app.use(cookieParser())
 
 app.use('/auth',authRouter)
 
-
-app.get('/sendEmail', async (req, res) => {
-    try {
-        await iMailer.sendEmail({
-            from: 'idiar16@gmail.com',
-            to: 'acostavictoria742@gmail.com',
-            subject: 'Mamalo victoria',
-            text: 'Pero bien mamao mardita'
-        })
-    } catch (error) {
-        res.status(500).json({
-            error: 'Error al enviar el email'
-        })
-    }
-})
-
-
-
 app.listen(PORT, ()=>{
     console.log(`Server listening on http://localhost:${PORT}`);
 })

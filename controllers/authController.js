@@ -1,5 +1,6 @@
 import User from "../models/userModels.js"
 import jwtComponent from "../services/jwtComponent.js";
+import iMailer from "../instances/iMailer.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -64,7 +65,7 @@ class AuthController{
     static async registerPOST(req, res){
         try {
 
-            const { password, email } = req.body
+            const { email, password} = req.body
             const { register_token } = req.cookies
             
             const {id_cardNumber} = jwtComponent.verifyToken({
@@ -84,6 +85,7 @@ class AuthController{
             return res.status(200).json({
                 mensaje: `Registro de poseedor de cedula ${id_cardNumber} exitoso`
             })
+
         } catch (error) {
             console.log('Error en registerPOST: ', error)
             return res.status(500).json({
@@ -207,7 +209,15 @@ class AuthController{
             const verificationToken = jwtComponent.generateToken({
                 payload: {email},
                 token_key: process.env.VERIFICATION_TOKEN_SECRET,
-                options: {expiresIn: '5m'}
+                options: { expiresIn: '5m' }
+            })
+
+            await iMailer.sendEmail({
+                from: 'idiar16@gmail.com',
+                to: email,
+                subject: 'Solicitud de cambio de contraseña',
+                text: `Para cambiar su contraseña, por favor haga click en el siguiente enlace: 
+                http://servicio-tecnico-samh/reset-password?${verificationToken}.`
             })
 
             return res.status(200).json({

@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import Mail from 'nodemailer/lib/mailer';
 
 class Mailer {
     constructor(auth, secure){
