@@ -1,10 +1,10 @@
 {
-    "createUser": "INSERT INTO usuario (nom_usuario, ape_usuario, email_usuario, ced_usuario, tlf_usuario, id_cargo, usuario_registrado) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_usuario",
-    "registerUser": "UPDATE usuario SET pwd_usuario = $1, email2_usuario = $2, usuario_registrado = $3 WHERE ced_usuario = $4",
+    "createUser": "INSERT INTO persona ( ced_persona, nom_persona, apell_persona, tlf_persona, id_cargo ) VALUES ( $1, $2, $3, $4, $5 ) ",
+    "registerUser": "INSERT INTO usuario (ced_persona, pwd_usuario, usuario_registrado, email_usuario) VALUES ( $1, $2, $3, $4 )",
     "selectUserByUsername": "SELECT * FROM usuario WHERE LOWER(nom_usuario) = LOWER($1)",
     "selectUserByEmail": "SELECT email_usuario, nom_usuario, ape_usuario, ced_usuario FROM usuario WHERE email_usuario = $1",
-    "validatePhoneNumber": "SELECT tlf_usuario FROM usuario WHERE tlf_usuario = $1",
+    "validatePhoneNumber": "SELECT tlf_persona FROM persona WHERE tlf_persona = $1",
     "validatePassword": "SELECT pwd_usuario FROM usuario WHERE ced_usuario = $1",
     "validateIdCardNumber": "SELECT ced_usuario FROM usuario WHERE ced_usuario = $1",
-    "updateUserPassword": "UPDATE usuario SET pwd_usuario = $1 WHERE email_usuario = $2"
+    "updateUserPassword": "UPDATE usuario SET pwd_usuario = $1 WHERE ced_usuario = $2"
 }

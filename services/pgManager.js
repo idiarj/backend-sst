@@ -43,11 +43,11 @@ export class PgHandler{
     async exeQuery({key, params = [], client = null}){
         const isClientProvided = client ? true : false
         client = isClientProvided ? client : await this.getConn()
-        console.log('estoy en una transaccion?', isClientProvided)
+        //console.log('estoy en una transaccion?', isClientProvided)
+        
         // console.log(client)
         try {
-            console.log(`la key es ${key}`)
-            // console.log(`no me lee ${this.querys}`)
+            //console.log(`la key es ${key}`)
             const query = this.querys[key]
             if (!query) {
                 console.log(`NO HAY QUERY`)
@@ -64,7 +64,7 @@ export class PgHandler{
         } catch (error) {
 
             console.log(error)
-            throw new Error(`Error al ejecutar la consulta, ${error.message}`)
+            throw new Error(`Error al ejecutar la consulta ${key}, ${error.message}`)
 
         }finally{
             if(!isClientProvided){

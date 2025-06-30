@@ -63,16 +63,15 @@ class AuthController{
 
     static async registerPOST(req, res){
         try {
-            //console.log(req)
-            const {password, email} = req.body
-            const {register_token} = req.cookies
-            console.log(req.cookies)
-            
 
+            const { password, email } = req.body
+            const { register_token } = req.cookies
+            
             const {id_cardNumber} = jwtComponent.verifyToken({
                 token: register_token,
                 key: process.env.REGISTER_TOKEN_SECRET
             })
+
             console.log('Datos de registro: ', id_cardNumber, password)
             console.log('Decoded register token: ', id_cardNumber)
 
@@ -137,18 +136,14 @@ class AuthController{
 
     static async createUserPOST(req, res){
         try {
-            const {id_cardNumber, first_name, last_name, email, phone_number} = req.body;
-            // console.log(req.body)
+            const {id_cardNumber, first_name, last_name, phone_number} = req.body;
 
             const createUserResult = await User.createUser({
                 name: first_name,
                 last_name,
-                email,
                 id_cardNumber,
                 phone_number
             })
-
-            console.log(createUserResult)
 
             if(!createUserResult.success){
                 return res.status(createUserResult.status).json({
@@ -160,7 +155,6 @@ class AuthController{
                 ...createUserResult
             })
 
-            
         } catch (error) {
             console.log('Error en createUserPOST: ', error);
             return res.status(500).json({
@@ -195,11 +189,43 @@ class AuthController{
         }
     }
 
-    static async changePassowrd(req, res){
+    static async forgotPassword(req, res){
         try {
-            const {newPassword} = req.body
-            const {result} = await User.changePassword({email: req.user.email, newPassword})
-            console.log('Resultado de cambio de contraseña: ', result)
+            const {email} = req.body;
+            console.log('Datos de verificación de email: ', email)
+
+            // Validar email
+            const isValidEmail = await User.validateEmail({email})
+            console.log('isValidEmail: ', isValidEmail)
+            if(!isValidEmail.exists){
+                return res.status(404).json({
+                    error: 'Email no registrado en el sistema.'
+                })
+            }
+
+            // Generar token de verificación
+            const verificationToken = jwtComponent.generateToken({
+                payload: {email},
+                token_key: process.env.VERIFICATION_TOKEN_SECRET,
+                options: {expiresIn: '5m'}
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: 'Email verificado exitosamente.'
+            })
+
+        } catch (error) {
+            return res.status(500).json({
+                error: 'Error al intentar verificar el email.'
+            })
+        }
+    }
+
+    static async changePassword(req, res){
+        try {
+            const {verification_token} = req.headers['authorization'];
+            const {newPassword} = req.body;
 
 
         } catch (error) {

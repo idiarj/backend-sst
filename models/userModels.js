@@ -4,24 +4,16 @@ import CryptManager from "../services/bcrypt.js";
 import jwtComponent from "../services/jwtComponent.js";
 
 class User {
-    static async createUser({name, last_name, email, id_cardNumber, phone_number}){
+    static async createUser({name, last_name, id_cardNumber, phone_number}){
         try {
             // Simulacion de insertar usuario en la bd
             // if(await this.validateUsername({username})){
             //     throw new Error('El nombre de usuario ya existe');
             // }
 
-            const [isValidEmail, isValidPhoneNumber] = await Promise.all([
-                this.validateEmail({email}),
-                this.validatePhoneNumber({phone_number})])
+            const isValidPhoneNumber = await this.validatePhoneNumber({phone_number});  
 
-            if(isValidEmail){
-                return {
-                    success: false,
-                    message: 'El email ya está asociado a un usuario.',
-                    status: 409
-                }
-            }
+ 
 
             if(isValidPhoneNumber.success){
                 return {
@@ -34,7 +26,7 @@ class User {
             let registerFlag = false;
     
             const key = 'createUser';
-            const params = [name, last_name, email, id_cardNumber, phone_number, 1, registerFlag];
+            const params = [id_cardNumber, name, last_name, phone_number, 1];
             const result = await iPgManager.exeQuery({key, params});
 
             return {
@@ -57,7 +49,7 @@ class User {
             // Encriptar la contraseña
             const hashedPassword = await CryptManager.encriptarData({data: password, saltRounds: 10})
             const isValdEmail = await this.validateEmail({email});
-            if(isValdEmail.success){
+            if(isValdEmail.exists){
                 email = null; // Si el email ya existe, lo dejamos como null
             }
 
@@ -111,9 +103,9 @@ class User {
             const params = [email];
             const result = await iPgManager.exeQuery({key, params});
             if (result.length > 0) {
-                return {success: true, result: result[0]}; // El email ya existe
+                return {exists: true, result: result[0]}; // El email ya existe
             }
-            return false; // El email no existe
+            return {exists: false}; // El email no existe
         } catch (error) {
             console.error('Error en validateEmail model:', error)
             throw new Error(`Error al validar el email: ${error.message}`);
@@ -141,9 +133,9 @@ class User {
             const params = [phone_number];
             const result = await iPgManager.exeQuery({key, params});
             if (result.length > 0) {
-                return {success: true, result}; // El número de teléfono ya existe
+                return {exists: true, result}; // El número de teléfono ya existe
             }
-            return {success: false}; // El número de teléfono no existe
+            return {exists: false}; // El número de teléfono no existe
         } catch (error) {
             console.error('Error en validatePhoneNumber model:', error)
             throw new Error(`Error al validar el número de teléfono: ${error.message}`);
