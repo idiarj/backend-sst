@@ -11,10 +11,17 @@ class User {
             //     throw new Error('El nombre de usuario ya existe');
             // }
 
-            const isValidPhoneNumber = await this.validatePhoneNumber({phone_number});  
+            const [isValidIdCardNumber, isValidPhoneNumber] = await Promise.all([this.validatePhoneNumber({phone_number}), 
+                this.validateIdCardNumber({id_cardNumber})]);  
 
- 
-
+            if(isValidIdCardNumber.exists){
+                return {
+                    success: false,
+                    message: 'La cédula ya está asociada a un usuario.',
+                    status: 409
+                }
+            }
+            
             if(isValidPhoneNumber.success){
                 return {
                     success: false,
@@ -50,16 +57,24 @@ class User {
             const hashedPassword = await CryptManager.encriptarData({data: password, saltRounds: 10})
             const isValdEmail = await this.validateEmail({email});
             if(isValdEmail.exists){
-                email = null; // Si el email ya existe, lo dejamos como null
+                return {
+                    success: false,
+                    status: 400,
+                    message: 'El correo ya esta asociado a un usuario.'
+                }
             }
 
             // Preparar y ejecutar la consulta
             const key1 = 'registerUser';
-            const params1 = [hashedPassword, email, true, id_cardNumber];
+            const params1 = [id_cardNumber, hashedPassword, true, email];
             await iPgManager.exeQuery({key: key1, params: params1, client})
             //console.log('ID del usuario registrado:', id_usuario);
             await iPgManager.commitTransaction(client);
-            return {success: true}
+            return {
+                success: true,
+                status: 200,
+                message: `Registo del poseedor de la cedula ${id_cardNumber} exitoso.`
+            }
         } catch (error) {
             await iPgManager.rollbackTransaction(client)
             console.error('Error en registrar usuario model:', error)
@@ -116,8 +131,9 @@ class User {
         try {
             const key = 'validatePassword';
             const params = [id_cardNumber]
-            console.log('Contraseña del usuario:', pwd_usuario);
+            console.log('Contraseña del usuario:', password);
             const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
+            console.log('Contraseña obtenida de la base de datos:', pwd_usuario);
             
             const isValdPwd = await CryptManager.compareData({hashedData: pwd_usuario, toCompare: password})
             

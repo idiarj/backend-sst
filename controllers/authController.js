@@ -76,14 +76,14 @@ class AuthController{
             console.log('Datos de registro: ', id_cardNumber, password)
             console.log('Decoded register token: ', id_cardNumber)
 
-            await User.registerUserPOST({
+            const {status, message} = await User.registerUserPOST({
                 id_cardNumber,
                 email,
                 password
             })
 
-            return res.status(200).json({
-                mensaje: `Registro de poseedor de cedula ${id_cardNumber} exitoso`
+            return res.status(status).json({
+                mensaje: message
             })
 
         } catch (error) {
@@ -222,7 +222,7 @@ class AuthController{
 
             return res.status(200).json({
                 success: true,
-                message: 'Email verificado exitosamente.'
+                message: 'Email de recuperacion enviado exitosamente.'
             })
 
         } catch (error) {
