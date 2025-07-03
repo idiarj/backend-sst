@@ -34,7 +34,9 @@ class User {
     
             const key = 'createUser';
             const params = [id_cardNumber, name, last_name, phone_number, 1];
-            const result = await iPgManager.exeQuery({key, params});
+            await iPgManager.exeQuery({key, params});
+
+           
 
             return {
                 success: true,
@@ -47,7 +49,7 @@ class User {
             throw new Error(`Error al crear el usuario.`);
         }
     }
-
+    
     static async registerUserPOST({id_cardNumber, email, password}){
         const client = await iPgManager.beginTransaction();
         try {

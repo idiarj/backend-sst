@@ -6,5 +6,8 @@
     "validatePhoneNumber": "SELECT tlf_persona FROM persona WHERE tlf_persona = $1",
     "validatePassword": "SELECT pwd_usuario FROM usuario WHERE ced_persona = $1",
     "validateIdCardNumber": "SELECT ced_persona FROM persona WHERE ced_persona = $1",
-    "updateUserPassword": "UPDATE usuario SET pwd_usuario = $1 WHERE ced_persona = $2"
+    "updateUserPassword": "UPDATE usuario SET pwd_usuario = $1 WHERE ced_persona = $2",
+    "createDepartament": "INSERT INTO departamento (nom_sede, id_sede) VALUES ($1, $2)",
+    "getDepartamentsByHQ": ""
+    
 }
