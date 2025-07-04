@@ -27,6 +27,7 @@ class AuthController{
             console.log('isValidIdCardNumber: ', isValidIdCardNumber)
             if(!isValidIdCardNumber.exists){
                 return res.status(404).json({
+                    success: false,
                     error: 'Este número de cédula no está vinculado a ningún usuario'
                 })
             }
@@ -36,6 +37,7 @@ class AuthController{
             console.log('isValidPwd', isValidPassword)
             if(!isValidPassword.success){
                 return res.status(401).json({
+                    success: false,
                     error: 'Contraseña incorrecta'
                 })
             }
@@ -51,6 +53,7 @@ class AuthController{
             res.cookie('access_token', token, { httpOnly: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 2 }); // 2 horas
 
             return res.status(200).json({
+                success: true,
                 message: `Login exitoso`
             })
         } catch (error) {
