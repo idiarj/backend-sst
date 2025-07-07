@@ -1,2 +1,10 @@
-## Register
-GET http://localhost:3000/auth/register
+### Create a new user
+POST https://backend-sst.onrender.com/auth/createUser
+Content-Type: application/json
+
+{
+  "id_cardNumber": "30106795",
+  "first_name": "Victoria",
+  "last_name": "Acosta",
+  "phone_number": "414-6935805"
+}
