@@ -18,6 +18,14 @@ class ReportsModel {
             throw new Error('Error creating report: ' + error.message);
         }
     }
+
+    static async getReports(){
+        try {
+            
+        } catch (error) {
+            throw new Error('Error al obtener los reportes:', error.message)
+        }
+    }
 }
 
 

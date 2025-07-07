@@ -2,7 +2,7 @@ import express from 'express';
 import { authRouter } from '../routes/dispatcher.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { cors_config } from '../config/exports.js';
+import { cors_config } from '../exports/exports.js';
 
 
 const PORT = process.env.PORT || 4000;
