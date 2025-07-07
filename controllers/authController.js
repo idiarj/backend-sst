@@ -108,6 +108,7 @@ class AuthController{
             console.log('isValidIdCardNumber: ', isValidIdCardNumber)
             if(!isValidIdCardNumber.exists){
                 return res.status(404).json({
+                    success: false,
                     error: 'Cedula no registrada en el sistema.'
                 })
             }
