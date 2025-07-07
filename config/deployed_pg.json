@@ -1,4 +1,4 @@
 {
-    "connectionString": "postgresql://neondb_owner:npg_gw6Rv4cbTjNL@ep-lucky-grass-a8ddzrqm-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "connectionString": "postgresql://neondb_owner:npg_P5SQco7mXrtM@ep-black-bush-a8r86f6h-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require",
     "ssl": { "rejectUnauthorized": false }
 }

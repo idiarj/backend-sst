@@ -33,7 +33,7 @@ class User {
             let registerFlag = false;
     
             const key = 'createUser';
-            const params = [id_cardNumber, name, last_name, phone_number, 1];
+            const params = [id_cardNumber, name, last_name, phone_number, 1, null];
             await iPgManager.exeQuery({key, params});
 
            
