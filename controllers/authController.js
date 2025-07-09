@@ -50,7 +50,7 @@ class AuthController{
                 options: { expiresIn: '2h' }
             });
 
-            res.cookie('access_token', token, { httpOnly: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 2 }); // 2 horas
+            res.cookie('access_token', token, { httpOnly: true, sameSite: 'lax', maxAge: 1000 * 60 * 60 * 2 }); // 2 horas
 
             return res.status(200).json({
                 success: true,
@@ -68,10 +68,12 @@ class AuthController{
     static async registerPOST(req, res){
         try {
 
-            const { email, password} = req.body
+            const { email, password } = req.body
             const { register_token } = req.cookies
+
+            console.log('Register token: ', register_token)
             
-            const {id_cardNumber} = jwtComponent.verifyToken({
+            const { id_cardNumber } = jwtComponent.verifyToken({
                 token: register_token,
                 key: process.env.REGISTER_TOKEN_SECRET
             })
@@ -79,13 +81,14 @@ class AuthController{
             console.log('Datos de registro: ', id_cardNumber, password)
             console.log('Decoded register token: ', id_cardNumber)
 
-            const {status, message} = await User.registerUserPOST({
+            const {status, message, success} = await User.registerUserPOST({
                 id_cardNumber,
                 email,
                 password
             })
 
             return res.status(status).json({
+                success,
                 mensaje: message
             })
 
@@ -121,7 +124,7 @@ class AuthController{
 
             res.cookie('register_token', registerToken, {
                 httpOnly: true,
-                sameSite: 'none',
+                sameSite: 'lax',
                 maxAge: 1000 * 60 * 5
             })
 
@@ -221,7 +224,7 @@ class AuthController{
                 to: email,
                 subject: 'Solicitud de cambio de contraseña',
                 text: `Para cambiar su contraseña, por favor haga click en el siguiente enlace: 
-                http://servicio-tecnico-samh/reset-password?${verificationToken}.`
+                http:/localhost:5173/newpassword?${verificationToken}.`
             })
 
             return res.status(200).json({
