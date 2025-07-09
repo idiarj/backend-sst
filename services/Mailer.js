@@ -43,7 +43,7 @@ class Mailer {
 
     async sendTemplate({from, to, subject, template, attachments = []}) {
         try {
-            console.log(from, to, subject, template);
+            //console.log(from, to, subject, template);
             const transporter = await this.createTransport();
             const info = await transporter.sendMail({
                 from,

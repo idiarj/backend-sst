@@ -219,13 +219,166 @@ class AuthController{
                 options: { expiresIn: '5m' }
             })
 
-            await iMailer.sendEmail({
+            // await iMailer.sendEmail({
+            //     from: 'idiar16@gmail.com',
+            //     to: email,
+            //     subject: 'Solicitud de cambio de contraseña',
+            //     text: `<!DOCTYPE html>
+            //         <html lang="es">
+            //         <head>
+            //         <meta charset="UTF-8" />
+            //         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            //         <title>Recuperación de contraseña</title>
+            //         <style>
+            //             body {
+            //             font-family: 'Segoe UI', sans-serif;
+            //             background-color: #f4f4f4;
+            //             margin: 0;
+            //             padding: 0;
+            //             }
+            //             .container {
+            //             background-color: #ffffff;
+            //             max-width: 600px;
+            //             margin: 40px auto;
+            //             border-radius: 10px;
+            //             overflow: hidden;
+            //             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            //             }
+            //             .header {
+            //             background-color: #3c558a;
+            //             color: white;
+            //             padding: 20px;
+            //             text-align: center;
+            //             }
+            //             .header h1 {
+            //             margin: 0;
+            //             font-size: 20px;
+            //             }
+            //             .content {
+            //             padding: 30px;
+            //             color: #333333;
+            //             line-height: 1.6;
+            //             }
+            //             .button {
+            //             display: inline-block;
+            //             margin-top: 20px;
+            //             padding: 12px 20px;
+            //             background-color: #faae97;
+            //             color: #ffffff;
+            //             text-decoration: none;
+            //             border-radius: 6px;
+            //             font-weight: bold;
+            //             }
+            //             .footer {
+            //             text-align: center;
+            //             font-size: 12px;
+            //             color: #777777;
+            //             padding: 20px;
+            //             }
+            //         </style>
+            //         </head>
+            //         <body>
+            //         <div class="container">
+            //             <div class="header">
+            //             <h1>Sistema de Soporte Técnico</h1>
+            //             </div>
+            //             <div class="content">
+            //             <p>Hola,</p>
+            //             <p>Hemos recibido una solicitud para restablecer la contraseña de su cuenta.</p>
+            //             <p>Para cambiar su contraseña, por favor haga clic en el siguiente botón:</p>
+            //             <a href="http://localhost:5173/newpassword?${verificationToken}" class="button">Cambiar contraseña</a>
+            //             <p>Si usted no solicitó este cambio, puede ignorar este mensaje.</p>
+            //             <p>Gracias,<br/>El equipo de soporte técnico</p>
+            //             </div>
+            //             <div class="footer">
+            //             © 2025 Sistema de Soporte Técnico - Todos los derechos reservados.
+            //             </div>
+            //         </div>
+            //         </body>
+            //         </html>
+            //         .`
+            // })
+
+            console.log('Verification token: ', verificationToken)
+            await iMailer.sendTemplate({
                 from: 'idiar16@gmail.com',
                 to: email,
                 subject: 'Solicitud de cambio de contraseña',
-                text: `Para cambiar su contraseña, por favor haga click en el siguiente enlace: 
-                http:/localhost:5173/newpassword?${verificationToken}.`
-            })
+                template: `<!DOCTYPE html>
+                            <html lang="es">
+                            <head>
+                            <meta charset="UTF-8" />
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                            <title>Recuperación de contraseña</title>
+                            <style>
+                                body {
+                                    font-family: 'Segoe UI', sans-serif;
+                                    background-color: #f4f4f4;
+                                    margin: 0;
+                                    padding: 0;
+                                }
+                                .container {
+                                    background-color: #ffffff;
+                                    max-width: 600px;
+                                    margin: 40px auto;
+                                    border-radius: 10px;
+                                    overflow: hidden;
+                                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                                }
+                                .header {
+                                    background-color: #3c558a;
+                                    color: white;
+                                    padding: 20px;
+                                    text-align: center;
+                                }
+                                .header h1 {
+                                    margin: 0;
+                                    font-size: 20px;
+                                }
+                                .content {
+                                    padding: 30px;
+                                    color: #333333;
+                                    line-height: 1.6;
+                                }
+                                .button {
+                                    display: inline-block;
+                                    margin-top: 20px;
+                                    padding: 12px 20px;
+                                    background-color: #faae97;
+                                    color: #ffffff;
+                                    text-decoration: none;
+                                    border-radius: 6px;
+                                    font-weight: bold;
+                                }
+                                .footer {
+                                    text-align: center;
+                                    font-size: 12px;
+                                    color: #777777;
+                                    padding: 20px;
+                                }
+                            </style>
+                            </head>
+                            <body>
+                            <div class="container">
+                                <div class="header">
+                                    <h1>Sistema de Soporte Técnico</h1>
+                                </div>
+                                <div class="content">
+                                    <p>Hola,</p>
+                                    <p>Hemos recibido una solicitud para restablecer la contraseña de su cuenta.</p>
+                                    <p>Para cambiar su contraseña, por favor haga clic en el siguiente botón:</p>
+                                    <a href="http://localhost:5173/newpassword?token=${verificationToken}" class="button">Cambiar contraseña</a>
+                                    <p>Si usted no solicitó este cambio, puede ignorar este mensaje.</p>
+                                    <p>Gracias,<br/>El equipo de soporte técnico del SAMH</p>
+                                </div>
+                                <div class="footer">
+                                    © 2025 SAMH - Todos los derechos reservados.
+                                </div>
+                            </div>
+                            </body>
+                            </html>`
+                            });
+
 
             return res.status(200).json({
                 success: true,
