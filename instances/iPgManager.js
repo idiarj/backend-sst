@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-const isDeployed = process.env.DEPLOYED_FLAG === 'true';
+const isDeployed = process.env.DEPLOYED_DB_FLAG === 'true';
 
 const pg_config = isDeployed ? deployed_pg : local_pg;
 

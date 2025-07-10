@@ -161,11 +161,11 @@ class User {
         }
     }
 
-    static async changePassword({newPassword}){
+    static async changePassword({newPassword, email}){
         try {
-            const key = 'changePassword';
+            const key = 'updateUserPassword';
             const hashedNewPassword = await CryptManager.encriptarData({data: newPassword, saltRounds: 10});
-            const params = [hashedNewPassword];
+            const params = [hashedNewPassword, email];
             const result = await iPgManager.exeQuery({key, params});
             return {success: true, message: 'Contraseña cambiada exitosamente', result};
         } catch (error) {

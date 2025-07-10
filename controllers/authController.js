@@ -394,10 +394,31 @@ class AuthController{
 
     static async changePassword(req, res){
         try {
-            const {verification_token} = req.headers['authorization'];
+            const verification_token = req.headers['authorization'];
             const {newPassword} = req.body;
 
+            console.log('headers:', req.headers)
+            console.log(verification_token)
+            console.log(newPassword)
 
+            const splittedHeader = verification_token.split(' ');
+
+            console.log('token: ', splittedHeader[1])
+            const {email} = jwtComponent.verifyToken({
+                token: splittedHeader[1],
+                key: process.env.VERIFICATION_TOKEN_SECRET
+            })
+            //console.log(decoded)
+
+            const {success, message} = await User.changePassword({
+                newPassword,
+                email
+            })
+
+            return res.status(200).json({
+                success,
+                message
+            })
         } catch (error) {
             return res.status(500).json({
                 error: 'Error al intentar cambiar la contraseña',
