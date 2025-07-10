@@ -6,16 +6,16 @@ import { cors_config } from '../exports/exports.js';
 
 
 const PORT = process.env.PORT || 4000;
-const isServerDeployed = process.env.DEPLOYED_SERVER_FLAG
+const isServerDeployed = process.env.DEPLOYED_SERVER_FLAG === 'true'
+const url = isServerDeployed ? `https://backend-sst.onrender.com, on port ${PORT}.` : `http:localhost:${PORT}`;
+
+console.log('Estoy con el servidor de produccion?', isServerDeployed);
 
 const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors(cors_config))
-
-
-const url = isServerDeployed === 'true' ? `https://backend-sst.onrender.com, on port ${PORT}` : `http:localhost:${PORT}`;
 
 app.use('/auth', authRouter)
 
