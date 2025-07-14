@@ -187,7 +187,8 @@ class AuthController{
             res.clearCookie('access_token');
             console.log(req.cookies)
             return res.status(200).json({
-                message: 'Logout exitoso'
+                message: 'Logout exitoso',
+                success: true
             })
         } catch (error) {
             console.error('Error en logoutPOST: ', error)
