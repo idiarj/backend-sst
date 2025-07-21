@@ -99,20 +99,15 @@ class User {
         }
     }
 
-    // static async validateUsername({username}){
-    //     try {
-    //         const key = 'selectUserByUsername';
-    //         const params = [username];
-    //         const result = await iPgManager.exeQuery({key, params});
-    //         if (result.length > 0) {
-    //             return {success: true, result}; // El nombre de usuario ya existe
-    //         }
-    //         return {success: false}; // El nombre de usuario no existe
-    //     } catch (error) {
-    //         console.error('Error en validateUser model:', error)
-    //         throw new Error(`Error al validar el nombre de usuario: ${error.message}`);
-    //     }
-    // }
+    static async getUser({id_cardNumber}){
+        try {
+            const key = 'getUsername';
+            
+        } catch (error) {
+            console.error('Error en getUser model:', error)
+            throw new Error(`Error al obtener la informacion del usuario: ${error.message}`);
+        }
+    }
 
     static async validateEmail({email}){
         try {

@@ -2,7 +2,7 @@ import User from "../models/userModels.js"
 import jwtComponent from "../services/jwtComponent.js";
 import iMailer from "../instances/iMailer.js";
 import dotenv from 'dotenv';
-dotenv.config();
+//dotenv.config();
 
 class AuthController{
     static async loginPOST(req, res){
@@ -143,46 +143,17 @@ class AuthController{
         }
     }
 
-    static async createUserPOST(req, res){
-        try {
-            const {id_cardNumber, first_name, last_name, phone_number} = req.body;
-
-            const createUserResult = await User.createUser({
-                name: first_name,
-                last_name,
-                id_cardNumber,
-                phone_number
-            })
-
-            if(!createUserResult.success){
-                return res.status(createUserResult.status).json({
-                    message: createUserResult.message,
-                })
-            }
-
-            return res.status(createUserResult.status).json({
-                ...createUserResult
-            })
-
-        } catch (error) {
-            console.log('Error en createUserPOST: ', error);
-            return res.status(500).json({
-                error: 'Error al intentar crear el usuario',
-                detalle: error.message
-            })
-        }
-    }
-
     static async logout(req, res){
         try {
             console.log(req.cookies)
             const {access_token} = req.cookies
+            console.log('Datos de logout: ', access_token)
             if(!access_token){
-                res.status(200).json({
+                res.status(403).json({
                     error: 'No hay una sesion activa.'
                 })
+                return;
             }
-            console.log('Datos de logout: ', access_token)
 
             res.clearCookie('access_token');
             console.log(req.cookies)

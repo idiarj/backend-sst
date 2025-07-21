@@ -1,7 +1,7 @@
 {
     "createUser": "INSERT INTO persona (ced_persona, nom_persona, apell_persona, tlf_persona, id_cargo, id_equipo) VALUES ( $1, $2, $3, $4, $5, $6 ) ",
     "registerUser": "INSERT INTO usuario (ced_persona, pwd_usuario, usuario_registrado, email_usuario) VALUES ( $1, $2, $3, $4 )",
-    "selectUserByUsername": "SELECT * FROM usuario WHERE LOWER(nom_usuario) = LOWER($1)",
+    "selectUser": "SELECT * from",
     "selectUserByEmail": "SELECT email_usuario FROM usuario WHERE LOWER(email_usuario) = LOWER($1)",
     "validatePhoneNumber": "SELECT tlf_persona FROM persona WHERE tlf_persona = $1",
     "validatePassword": "SELECT pwd_usuario FROM usuario WHERE ced_persona = $1",

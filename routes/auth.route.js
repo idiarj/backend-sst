@@ -7,7 +7,6 @@ export const authRouter = Router();
 authRouter.post('/register', registerTokenMiddleware, AuthController.registerPOST)
 authRouter.post('/login', AuthController.loginPOST)
 authRouter.post('/logout', AuthController.logout)
-authRouter.post('/createUser', AuthController.createUserPOST)
 authRouter.post('/verifyIdCard', AuthController.verifyIdCardNumberPOST)
 authRouter.post('/forgot-password', AuthController.forgotPassword)
 authRouter.post('/reset-password', AuthController.changePassword)

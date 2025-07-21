@@ -1,6 +1,6 @@
 import jwtComponent from "../services/jwtComponent.js";
 import dotenv from 'dotenv';
-dotenv.config();
+//dotenv.config();
 
 export const registerTokenMiddleware = (req, res, next) => {
     try {
