@@ -15,7 +15,6 @@ export class PgHandler{
         this.config = config
         this.querys = querys
         this.pool = new Pool(this.config)
-        
     }
 
     /**

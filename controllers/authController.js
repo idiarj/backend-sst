@@ -1,8 +1,10 @@
 import User from "../models/userModels.js"
 import jwtComponent from "../services/jwtComponent.js";
 import iMailer from "../instances/iMailer.js";
-import dotenv from 'dotenv';
-//dotenv.config();
+import { config } from "../exports/exports.js";
+
+
+
 
 class AuthController{
     static async loginPOST(req, res){
@@ -46,7 +48,7 @@ class AuthController{
             const userData = isValidIdCardNumber.result[0]; // Extraer el usuario de la base de datos
             const token = jwtComponent.generateToken({
                 payload: { id_cardNumber: userData.id_cardNumber }, // Puedes agregar más campos si lo necesitas
-                token_key: process.env.ACCESS_TOKEN_SECRET,
+                token_key: config.ACCESS_TOKEN_KEY,
                 options: { expiresIn: '2h' }
             });
 
@@ -75,7 +77,7 @@ class AuthController{
             
             const { id_cardNumber } = jwtComponent.verifyToken({
                 token: register_token,
-                key: process.env.REGISTER_TOKEN_SECRET
+                key: config.REGISTER_TOKEN_KEY
             })
 
             console.log('Datos de registro: ', id_cardNumber, password)
@@ -118,7 +120,7 @@ class AuthController{
 
             const registerToken = jwtComponent.generateToken({
                 payload: {id_cardNumber},
-                token_key: process.env.REGISTER_TOKEN_SECRET,
+                token_key: config.REGISTER_TOKEN_KEY,
                 options: {expiresIn: '5m'}
             })
 
@@ -187,7 +189,7 @@ class AuthController{
             // Generar token de verificación
             const verificationToken = jwtComponent.generateToken({
                 payload: {email},
-                token_key: process.env.VERIFICATION_TOKEN_SECRET,
+                token_key: config.VERIFICATION_TOKEN_KEY,
                 options: { expiresIn: '5m' }
             })
 
@@ -378,7 +380,7 @@ class AuthController{
             console.log('token: ', splittedHeader[1])
             const {email} = jwtComponent.verifyToken({
                 token: splittedHeader[1],
-                key: process.env.VERIFICATION_TOKEN_SECRET
+                key: config.VERIFICATION_TOKEN_KEY
             })
             //console.log(decoded)
 

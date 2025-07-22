@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
 
-console.log(cors_config)
+//console.log(cors_config)
 const PORT = config.SERVER_PORT || 3000;
 const isServerDeployed = config.SERVER_DEPLOYED_FLAG === 'true';
 const url = isServerDeployed ? `https://backend-sst.onrender.com, on port ${PORT}.` : `http://localhost:${PORT}`;
@@ -16,9 +16,11 @@ const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors(cors_config))
+app.use(cors(config.cors_config))
 
 app.use('/auth', authRouter)
+app.use('/reports', reportsRouter)
+app.use('/user', userRouter)
 
 app.listen(PORT, ()=>{
     console.log(`Server listening on ${url}`);

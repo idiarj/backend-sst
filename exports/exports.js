@@ -25,7 +25,7 @@ export const config = {
     cors_config: readJson('../config/cors_cnf.json')
 }
 
-console.log(config);
+//console.log(config);
 
 // export const querys = readJson('../config/querys.json');
 // export const local_pg = readJson('../config/local_pg.json');
