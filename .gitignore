@@ -11,3 +11,9 @@ TODO.txt
 
 ### workspace.vscode
 backend-sst.code-workspace
+
+
+#Dockerfiles
+Dockerfile
+docker-compose.yml
+.dockerignore

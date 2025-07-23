@@ -1,6 +1,6 @@
 import { readJson } from "../utils/readJson.js";
 import dotenv from "dotenv";
-dotenv.config()
+dotenv.config();
 
 export const config = {
     SERVER_PORT: process.env.SERVER_PORT,
@@ -24,6 +24,8 @@ export const config = {
     querys: readJson('../config/querys.json'),
     cors_config: readJson('../config/cors_cnf.json')
 }
+
+console.log('Config loaded:', config);
 
 //console.log(config);
 
