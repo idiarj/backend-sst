@@ -5,7 +5,7 @@ import { config } from "../exports/exports.js";
 
 const isDeployed = config.DB_DEPLOYED_FLAG === 'true';
 
-const pg_config = isDeployed ? config.deployed_db : config.local_db ;
+const pg_config = config.local_db
 
 
 console.log('Estoy conectado a la base de datos desplegada? ', isDeployed )

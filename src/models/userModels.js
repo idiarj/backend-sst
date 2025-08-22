@@ -4,7 +4,8 @@ import CryptManager from "../services/bcrypt.js";
 import jwtComponent from "../services/jwtComponent.js";
 
 class User {
-    static async createUser({name, last_name, id_cardNumber, phone_number}){
+    static async createUser({name, last_name, id_cardNumber, phone_number, id_departamento, es_tecnico}){
+        const client = await iPgManager.beginTransaction();
         try {
             // Simulacion de insertar usuario en la bd
             // if(await this.validateUsername({username})){
@@ -33,11 +34,23 @@ class User {
             let registerFlag = false;
     
             const key = 'createUser';
-            const params = [id_cardNumber, name, last_name, phone_number, 1, null];
-            await iPgManager.exeQuery({key, params});
+            const params = [id_cardNumber, name, last_name, phone_number, 1, id_departamento];
+            const [{ced_persona}] = await iPgManager.exeQuery({key, params, client});
+            
+            console.log('Es tecnico', es_tecnico)
+
+            let id_rol = es_tecnico ? 3 : 2;
+
+            // console.log('Es tecnico, se registra en la tabla usuario_rol', Number(ced_persona))
+                await iPgManager.execRawQuery({
+                    query: 'INSERT INTO usuario_rol (ced_persona, id_rol) VALUES ($1, $2)',
+                    params: [Number(ced_persona), id_rol],
+                    client
+                })
+
 
            
-
+            await iPgManager.commitTransaction(client);
             return {
                 success: true,
                 message: `Usuario ${name} ${last_name} con C.I: ${id_cardNumber} creado con exito.`,
@@ -45,6 +58,7 @@ class User {
             }
 
         } catch (error) {
+            await iPgManager.rollbackTransaction(client);
             console.error('Error en createUser Model:', error)
             throw new Error(`Error al crear el usuario.`);
         }
@@ -129,12 +143,12 @@ class User {
             const key = 'validatePassword';
             const params = [id_cardNumber]
             console.log('Contraseña del usuario:', password);
-            const [{pwd_usuario}] = await iPgManager.exeQuery({key, params})
+            const [{id_usuario, pwd_usuario}] = await iPgManager.exeQuery({key, params})
             console.log('Contraseña obtenida de la base de datos:', pwd_usuario);
             
             const isValdPwd = await CryptManager.compareData({hashedData: pwd_usuario, toCompare: password})
-            
-            return {success: isValdPwd};
+
+            return {success: isValdPwd, id_usuario};
         } catch (error) {
             console.error('Error en validatePassword model:', error)
             throw new Error(`Error al verificar la contraseña: ${error.message}`);

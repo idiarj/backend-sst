@@ -1,5 +1,5 @@
 import Pool from 'pg-pool'
-
+const TRUNC = (s, n = 500) => (typeof s === 'string' && s.length > n ? s.slice(0, n) + '…' : s);
 /**
  * @class Clase para manejar conexiones y realizar consultas a una base de datos SQL.
  */
@@ -28,6 +28,74 @@ export class PgHandler{
             throw new Error(`No se ha podido obtener una conexion, ${error.message}`)
         }
     }
+
+async execRawQuery({
+  query,
+  params = [],
+  client = null,
+  timeoutMs = 5000,         // statement_timeout por consulta
+  logLabel = 'execRawQuery' // etiqueta para logs
+}) {
+  const isClientProvided = !!client;
+  const start = Date.now();
+
+  // Consigue cliente si no te lo pasaron
+  client = isClientProvided ? client : await this.getConn();
+
+  const shortQuery = TRUNC(query, 600);
+  const shortParams = TRUNC(JSON.stringify(params), 800);
+
+  // Opcional: stats del pool si los tienes disponibles
+  const logPoolStats = async () => {
+    try {
+      if (this.pool) {
+        console.log(`[${logLabel}] pool stats`, {
+          total: this.pool.totalCount,
+          idle: this.pool.idleCount,
+          waiting: this.pool.waitingCount
+        });
+      }
+    } catch {}
+  };
+
+  try {
+    console.log(`[${logLabel}] SQL -> ${shortQuery}`);
+    console.log(`[${logLabel}] params -> ${shortParams}`);
+
+    // Establece statement_timeout por consulta.
+    // Nota: SET LOCAL requiere transacción. Si no estás en transacción, usa SET y luego resetea.
+    await client.query(`SET statement_timeout = '${timeoutMs}ms'`);
+
+    const result = await client.query(query, params);
+
+    const ms = Date.now() - start;
+    console.log(`[${logLabel}] rowCount=${result.rowCount} in ${ms}ms`);
+
+    // IMPORTANTE: no loguees result completo (puede ser enorme)
+    return result.rows;
+  } catch (error) {
+    // Si la consulta tardó mucho, imprime stats del pool para diagnosticar
+    const ms = Date.now() - start;
+    if (ms > timeoutMs) {
+      console.warn(`[${logLabel}] exceeded timeout (${ms}ms > ${timeoutMs}ms)`);
+      await logPoolStats();
+    }
+    console.error(`[${logLabel}] ERROR: ${error.message}`);
+    throw new Error(`Error al ejecutar la consulta: ${error.message}`);
+  } finally {
+    try {
+      // Restablece el timeout para que no quede pegado al cliente del pool
+      await client.query(`SET statement_timeout = DEFAULT`);
+    } catch {}
+    if (!isClientProvided) {
+      try {
+        await this.releaseConn(client);
+      } catch (e) {
+        console.error(`[${logLabel}] WARN releaseConn: ${e?.message || e}`);
+      }
+    }
+  }
+}
 
     /**
      * @method - Metodo asincrona para ejecutar una consulta SQL a una base de datos.

@@ -46,8 +46,9 @@ class AuthController{
 
             // Crear sesion con jsonwebtoken
             const userData = isValidIdCardNumber.result[0]; // Extraer el usuario de la base de datos
+            console.log(userData)
             const token = jwtComponent.generateToken({
-                payload: { id_cardNumber: userData.id_cardNumber }, // Puedes agregar más campos si lo necesitas
+                payload: { id_usuario: isValidPassword.id_usuario, ...userData }, // Puedes agregar más campos si lo necesitas
                 token_key: config.ACCESS_TOKEN_KEY,
                 options: { expiresIn: '2h' }
             });
@@ -56,7 +57,8 @@ class AuthController{
 
             return res.status(200).json({
                 success: true,
-                message: `Login exitoso`
+                message: `Login exitoso`,
+                data: userData
             })
         } catch (error) {
             console.log('Error en login POST: ', error)

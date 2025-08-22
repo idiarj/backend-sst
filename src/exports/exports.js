@@ -25,7 +25,7 @@ export const config = {
     cors_config: readJson('../config/cors_cnf.json')
 }
 
-console.log('Config loaded:', config);
+//console.log('Config loaded:', config);
 
 //console.log(config);
 
